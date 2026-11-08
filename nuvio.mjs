@@ -48,10 +48,10 @@ export async function appendSection(action, body, token) {
   const target={addons:[],plugins:[],collections:[],[key]:current};
   const combined=mergeConfig(target,source,[key])[key];
   const added=combined.length-current.length;
-  // A duplicate-only request performs no write, preserving existing configuration.
-  if (!added) return {added:0};
+  const updated=current.filter((item,index)=>JSON.stringify(item)!==JSON.stringify(combined[index])).length;
+  if (JSON.stringify(combined)===JSON.stringify(current)) return {added:0,updated:0};
   const push={addons:'pushAddons',plugins:'pushPlugins',collections:'pushCollections'}[key];
   const param={addons:'p_addons',plugins:'p_plugins',collections:'p_collections_json'}[key];
   await nuvio(...routes[push],{p_profile_id:profile,[param]:combined},token);
-  return {added};
+  return {added,updated};
 }

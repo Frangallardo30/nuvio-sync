@@ -73,7 +73,7 @@ export const server = createServer(async (req, res) => {
       return send(200, await nuvio(...routes[action], body, token));
     }
     if (req.method !== 'GET') return send(405, {error: 'Método no permitido.'});
-    const files = {'/': ['index.html', 'text/html; charset=utf-8'], '/app.js': ['app.js', 'text/javascript; charset=utf-8'], '/style.css': ['style.css', 'text/css; charset=utf-8']};
+    const files = {'/': ['index.html', 'text/html; charset=utf-8'], '/model.mjs': ['model.mjs', 'text/javascript; charset=utf-8'], '/app.js': ['app.js', 'text/javascript; charset=utf-8'], '/style.css': ['style.css', 'text/css; charset=utf-8']};
     if (!files[url.pathname]) return send(404, {error: 'No encontrado.'});
     const [file, type] = files[url.pathname];
     res.writeHead(200, {'content-type': type}); res.end(await readFile(join(root, 'public', file)));

@@ -18,7 +18,7 @@ Importa el repositorio en Netlify; arrastrar únicamente la carpeta `public` no 
 
 - **Instalar plantilla:** instantánea compartida que solo el propietario autenticado puede actualizar.
 - **Copiar cuentas:** conectar origen y destino, elegir perfiles y transferir add-ons, plugins y colecciones.
-- Solo agregar elementos nuevos por sección, revisar cambios, descargar respaldo y comprobar el resultado.
+- Agregar elementos nuevos y actualizar complementos coincidentes, revisar cambios, descargar respaldo y comprobar el resultado.
 - Exportar/importar JSON. Si una escritura falla, se detiene la operación sin eliminar elementos para deshacerla.
 
 Las cuentas y contraseñas no se guardan. Las contraseñas pasan por la función durante el inicio de sesión hacia Nuvio. Los tokens temporales quedan en memoria del navegador; si expiran, vuelve a conectar. No se utiliza localStorage para credenciales. El login tiene un límite nativo de 12 solicitudes por IP cada minuto.
@@ -40,9 +40,11 @@ Abre http://localhost:3000. El servidor local usa `data/template.json`; este arc
 
 ## Conservación de los datos del destino
 
-Solo se agregan add-ons y plugins con URLs nuevas, y colecciones con IDs nuevos. Ante una coincidencia se conserva la configuración del destino: nombres, activación, orden y contenido de colecciones. La biblioteca, el historial, los nombres de perfiles y las preferencias no tienen rutas de escritura en esta app. La cuenta de origen solo se lee. Importar un JSON también sigue la regla de solo agregar; no permite restauraciones destructivas.
+Se agregan add-ons y plugins que falten. Si coinciden con uno del origen, se aplica la configuración del origen conservando la posición en destino. El resto de los complementos no cambia. Las colecciones existentes conservan su contenido. La biblioteca, el historial, los nombres de perfiles y las preferencias no tienen rutas de escritura en esta app. La cuenta de origen solo se lee.
 
-Antes de aplicar, puedes descargar un respaldo. Si ocurre un fallo parcial, se informa y puedes volver a revisar para agregar lo pendiente; no se borran elementos para deshacer. Las peticiones que solo contienen duplicados no escriben nada.
+La coincidencia se identifica por servidor y ruta de la URL, ignorando parámetros de consulta. Para Torrentio oficial (`torrentio.strem.fun`) también se reconoce la configuración codificada antes de `/manifest.json`. No se compara solo por nombre ni se agrupan todos los complementos alojados en un mismo dominio. Otros servicios que codifiquen su configuración en rutas distintas pueden necesitar una regla específica. En Torrentio, si hay varias configuraciones del mismo servicio, se conserva una con la configuración del origen. Revisa las coincidencias y las claves del origen antes de aplicar.
+
+Antes de aplicar, puedes descargar un respaldo. Si ocurre un fallo parcial, se informa y puedes volver a revisar para agregar lo pendiente; no se borran elementos para deshacer. Las peticiones que no cambian ningún dato no escriben nada.
 
 La API de Nuvio disponible guarda listas completas. El servidor lee la lista actual y conserva sus elementos al añadir los nuevos; no dispone de una operación atómica de agregado. Evita modificar el perfil simultáneamente desde otra app o dispositivo durante la transferencia. Esta protección se comprueba con pruebas simuladas; falta validarla con cuentas reales.
 

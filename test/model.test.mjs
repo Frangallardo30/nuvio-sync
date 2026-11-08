@@ -1,13 +1,19 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mergeConfig,validateConfig} from '../model.mjs';
+import {addonIdentity} from '../model.mjs';
 const addon=(url,name)=>({url,name,enabled:true,sort_order:0});
 const config=(addons=[],plugins=[],collections=[])=>({addons,plugins,collections});
-test('agregar conserva la configuración del destino en coincidencias por URL',()=>{
+test('identidad distingue servicios del mismo dominio y reconoce ajustes en query',()=>{
+  assert.notEqual(addonIdentity({url:'https://host.test/service-a/manifest.json'},'addons'),addonIdentity({url:'https://host.test/service-b/manifest.json'},'addons'));
+  assert.equal(addonIdentity({url:'https://host.test/manifest.json?language=en'},'addons'),addonIdentity({url:'https://host.test/manifest.json?language=es'},'addons'));
+  assert.notEqual(addonIdentity({url:'https://torrentio.strem.fun.evil.test/manifest.json'},'addons'),addonIdentity({url:'https://torrentio.strem.fun/manifest.json'},'addons'));
+});
+test('coincidencias reciben configuración de origen sin modificar otros complementos',()=>{
   const target=config([addon('https://a.test/manifest.json','anterior'),addon('https://b.test/manifest.json','conservar')]);
   const source=config([addon('https://a.test/manifest.json','actualizado'),addon('https://c.test/manifest.json','nuevo')]);
   const result=mergeConfig(target,source,['addons'],'merge');
-  assert.deepEqual(result.addons.map(x=>x.name),['anterior','conservar','nuevo']);
+  assert.deepEqual(result.addons.map(x=>x.name),['actualizado','conservar','nuevo']);
   assert.deepEqual(result.addons.map(x=>x.sort_order),[0,0,1]);
   assert.equal(target.addons[0].name,'anterior');
 });
