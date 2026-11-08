@@ -1,3 +1,4 @@
+import {shareableConfig} from './public/providers.mjs';
 import {createServer} from 'node:http';
 import {readFile, mkdir, writeFile, rename} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -36,7 +37,7 @@ export const server = createServer(async (req, res) => {
     }
     if (url.pathname === '/api/template') {
       if (req.method === 'GET') {
-        try {return send(200, JSON.parse(await readFile(join(dataDir, 'template.json'), 'utf8')));} catch (e) {if (e.code === 'ENOENT') return send(200, null); throw e;}
+        try {const saved=JSON.parse(await readFile(join(dataDir, 'template.json'), 'utf8'));saved.config=shareableConfig(saved.config);return send(200,saved);} catch (e) {if (e.code === 'ENOENT') return send(200, null); throw e;}
       }
       if (req.method !== 'POST') return send(405, {error: 'Método no permitido.'});
       if (!process.env.OWNER_EMAIL) return send(503, {error: 'Configura OWNER_EMAIL en el servidor con tu correo de Nuvio para habilitar el guardado de plantillas.'});
@@ -46,7 +47,7 @@ export const server = createServer(async (req, res) => {
       if (user.email?.toLowerCase() !== process.env.OWNER_EMAIL.toLowerCase()) return send(403, {error: 'Solo la cuenta propietaria puede actualizar la plantilla.'});
       const body = await jsonBody(req);
       if (body.reviewed !== true) return send(400, {error: 'Revisa las URLs y claves antes de compartir.'});
-      const template = {name: String(body.name || 'Mi configuración').slice(0, 80), updatedAt: new Date().toISOString(), config: validateConfig(body.config)};
+      const template = {name: String(body.name || 'Mi configuración').slice(0, 80), updatedAt: new Date().toISOString(), config: validateConfig(shareableConfig(body.config))};
       await mkdir(dataDir, {recursive: true, mode: 0o700});
       const pending = join(dataDir, `template-${crypto.randomUUID()}.tmp`);
       await writeFile(pending, JSON.stringify(template), {mode: 0o600});
@@ -73,7 +74,7 @@ export const server = createServer(async (req, res) => {
       return send(200, await nuvio(...routes[action], body, token));
     }
     if (req.method !== 'GET') return send(405, {error: 'Método no permitido.'});
-    const files = {'/': ['index.html', 'text/html; charset=utf-8'], '/model.mjs': ['model.mjs', 'text/javascript; charset=utf-8'], '/app.js': ['app.js', 'text/javascript; charset=utf-8'], '/style.css': ['style.css', 'text/css; charset=utf-8']};
+    const files = {'/': ['index.html', 'text/html; charset=utf-8'], '/providers.mjs': ['providers.mjs', 'text/javascript; charset=utf-8'], '/model.mjs': ['model.mjs', 'text/javascript; charset=utf-8'], '/app.js': ['app.js', 'text/javascript; charset=utf-8'], '/style.css': ['style.css', 'text/css; charset=utf-8']};
     if (!files[url.pathname]) return send(404, {error: 'No encontrado.'});
     const [file, type] = files[url.pathname];
     res.writeHead(200, {'content-type': type}); res.end(await readFile(join(root, 'public', file)));

@@ -1,4 +1,5 @@
-import {mergeConfig, addonIdentity} from '/model.mjs';
+import {shareableConfig, personalProvider, resolvePersonal} from '/providers.mjs';
+import {mergeConfig, addonIdentity, validateConfig} from '/model.mjs';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const keys = ['addons', 'plugins', 'collections'];
@@ -27,7 +28,7 @@ function connection(role, title, number) {
   return `<section class="panel"><div class="step-heading"><span class="step-number">${number}</span><h2>${title}</h2></div>${account ? `<div class="connection"><strong>${esc(account.email)}</strong><span>● Cuenta conectada · sesión temporal</span></div><label class="form-label" for="profile-${role}">Perfil ${role==='source'?'de origen':'de destino'}</label><select class="field" id="profile-${role}" data-profile="${role}">${account.profiles.map(p=>`<option value="${p.profile_index}" ${p.profile_index===account.profile?'selected':''}>${esc(p.name || `Perfil ${p.profile_index}`)}</option>`).join('')}</select><button class="text-button" data-action="disconnect-one" data-role="${role}">Cambiar de cuenta</button>` : `<form data-login="${role}"><label class="form-label" for="email-${role}">Correo de Nuvio</label><input class="field" id="email-${role}" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required><label class="form-label" for="password-${role}">Contraseña</label><input class="field" id="password-${role}" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña de Nuvio" required><button class="primary full" type="submit">Conectar ${role==='source'?'cuenta de origen':'cuenta de destino'} <span>↗</span></button><p class="small-note">La contraseña se usa para conectar y no se guarda.</p><p class="error no-margin" role="alert" data-error="${role}"></p></form>`}</section>`;
 }
 function items(config) {
-  return keys.map(k=>`<p class="section-label">${labels[k].toUpperCase()}</p><ul class="list">${config[k].length ? config[k].map(x=>`<li><span>${esc(x.name || x.title || 'Sin nombre')}</span><small>${x.enabled === false ? 'Desactivado' : '✓'}</small></li>`).join('') : '<li class="muted">Sin elementos</li>'}</ul>`).join('');
+  return keys.map(k=>`<p class="section-label">${labels[k].toUpperCase()}</p><ul class="list">${config[k].length ? config[k].map(x=>`<li><span>${esc(x.name || x.title || 'Sin nombre')}</span><small>${x.requiresAccount ? 'Requiere tu enlace' : x.enabled === false ? 'Desactivado' : '✓'}</small></li>`).join('') : '<li class="muted">Sin elementos</li>'}</ul>`).join('');
 }
 function options(config) {
   return `<section class="panel"><div class="step-heading"><span class="step-number">3</span><h2>Elige qué transferir</h2></div><div class="options">${keys.map(k=>`<label class="option"><input type="checkbox" data-section="${k}" ${selected.has(k)?'checked':''}>${labels[k]}<span>${config[k].length} elementos</span></label>`).join('')}</div><p class="notice">Se agregan los complementos que faltan. Si coinciden, se aplica la configuración del origen conservando su posición. Los demás se mantienen. No se modifican biblioteca, nombres de perfiles ni preferencias.</p><button class="primary full" data-action="review" ${!accounts.target || !selected.size?'disabled':''}>Revisar configuración <span>→</span></button></section>`;
@@ -48,19 +49,7 @@ function render() {
   }
   if (backup) $('#workspace').insertAdjacentHTML('beforeend','<p class="top-space"><button class="secondary" data-action="download-backup">Descargar último respaldo ↓</button> <span class="muted">Disponible durante esta sesión.</span></p>');
 }
-function normalize(config) {
-  if (!config || !keys.every(k=>Array.isArray(config[k]))) throw new Error('El archivo no contiene una configuración compatible.');
-  const out=emptyConfig();
-  keys.forEach(k=>{
-    if(config[k].length>1000)throw new Error('Máximo 1000 elementos por sección.');
-    out[k]=config[k].map((x,i)=>{
-      if (!x || typeof x!=='object') throw new Error('Hay elementos inválidos en el archivo.');
-      if(k==='collections') {if(typeof x.id!=='string'||!x.id)throw new Error('Una colección no tiene identificador.'); const {user_id,profile_id,...rest}=x;return rest;}
-      if(!['https:','http:'].includes(new URL(x.url).protocol))throw new Error('Hay una URL inválida.');
-      return {url:x.url,name:x.name??null,enabled:x.enabled!==false,sort_order:i,...(k==='plugins'?{repo_type:x.repo_type??null}:{})};
-    });
-  });return out;
-}
+function normalize(config) {return validateConfig(config);}
 async function readConfig(account, profile=account.profile, inherit=false) {
   const p=account.profiles.find(p=>p.profile_index===profile);
   const [addons,plugins,rows]=await Promise.all([api('addons',{profile:inherit&&p?.uses_primary_addons?0:profile},account),api('plugins',{profile:inherit&&p?.uses_primary_plugins?0:profile},account),api('collections',{p_profile_id:profile},account)]);
@@ -75,8 +64,29 @@ async function writeSection(account,k,config){
   await api(action,{p_profile_id:account.profile,items:config[k]},account);
 }
 function reviewPanel(html) {$('#review-content').innerHTML=html; if(!$('#review-dialog').open)$('#review-dialog').showModal();}
+async function collectPersonal(config,destination) {
+  const answers={};
+  const tasks=['addons','plugins'].flatMap(key=>selected.has(key)?config[key].flatMap((item,index)=>item.requiresAccount?[{key,index,item}]:[]):[]);
+  for(let step=0;step<tasks.length;step++){
+    const {key,index,item}=tasks[step];
+    const existing=destination[key].find(x=>{const p=personalProvider(x);return p && (p.providerId!=='personal'?p.providerId===item.providerId:x.name===item.name);});
+    reviewPanel(`<span class="badge">CONEXIONES PERSONALES · ${step+1}/${tasks.length}</span><h2>${esc(item.name)}</h2><p>Inicia sesión en la página del proveedor con tu propia cuenta, copia el enlace de instalación y pégalo aquí. No necesitas compartir tu contraseña con esta web.</p>${item.providerUrl?`<a class="secondary full" href="${esc(item.providerUrl)}" target="_blank" rel="noopener noreferrer">Abrir proveedor e iniciar sesión ↗</a>`:'<p class="notice">La plantilla no indica la página de este proveedor. Consulta a quien la preparó o continúa sin instalarlo.</p>'}<label class="form-label top-space" for="personal-choice">¿Cómo quieres continuar?</label><select id="personal-choice" class="field">${existing?'<option value="keep">Conservar mi enlace ya instalado</option>':''}<option value="own">Pegar mi enlace personal</option><option value="skip">Omitir este complemento</option></select><label class="form-label" for="personal-url">Tu enlace de instalación</label><input id="personal-url" class="field" type="url" autocomplete="off" spellcheck="false" placeholder="https://proveedor/tu-enlace/manifest.json"><p class="small-note">El enlace solo se usa para instalar en tu cuenta. No se guarda en la plantilla compartida.</p><p id="personal-error" class="error" role="alert"></p><button class="primary full" id="personal-next">Continuar →</button>`);
+    const sync=()=>{$('#personal-url').disabled=$('#personal-choice').value!=='own';};$('#personal-choice').onchange=sync;sync();
+    const answer=await new Promise(resolve=>{
+      const dialog=$('#review-dialog');const cancel=()=>resolve(null);dialog.addEventListener('close',cancel,{once:true});
+      $('#personal-next').onclick=()=>{
+        const answer={mode:$('#personal-choice').value,url:$('#personal-url').value.trim()};
+        try{resolvePersonal({addons:key==='addons'?[item]:[],plugins:key==='plugins'?[item]:[],collections:[]},{[`${key}:0`]:answer},destination);}catch(e){$('#personal-error').textContent=e.message;return;}
+        dialog.removeEventListener('close',cancel);resolve(answer);
+      };
+    });
+    if(!answer)return null;
+    answers[`${key}:${index}`]=answer;
+  }
+  return resolvePersonal(config,answers,destination);
+}
 async function reviewTransfer(){
-  const account=accounts.target, origin=mode==='plantilla'?template?.config:source;
+  const account=accounts.target;let origin=mode==='plantilla'?template?.config:source;
   if(!account||!origin||!selected.size)return;
   if(accounts.source && mode==='copiar' && accounts.source.id===account.id && accounts.source.profile===account.profile)throw new Error('El origen y el destino deben ser perfiles diferentes.');
   const profile=account.profiles.find(p=>p.profile_index===account.profile);
@@ -84,6 +94,9 @@ async function reviewTransfer(){
   reviewPanel('<h2>Leyendo el destino…</h2><p>Preparamos el resumen y el respaldo.</p>');
   try {
     const before=await readConfig(account);
+    origin=shareableConfig(origin);
+    origin=await collectPersonal(origin,before);
+    if(!origin)return;
     const sectionList=[...selected]; const after=merge(before,origin,sectionList);
     const target={...account};
     reviewPanel(`<span class="badge">REVISIÓN FINAL</span><h2>Así quedará el destino.</h2><p><strong>${esc(target.email)}</strong> · ${esc(profile.name)}<br>Modo: Agregar y actualizar complementos coincidentes</p>${sectionList.map(k=>`<div class="review-row"><span>${labels[k]}</span><span>${before[k].length} → <strong>${after[k].length}</strong> · ${k==='collections'?0:origin[k].filter(x=>before[k].some(y=>addonIdentity(x,k)===addonIdentity(y,k))).length} coincidencias a configurar</span></div>`).join('')}<p>Se guardará un respaldo en esta sesión. Descárgalo antes de aplicar y consérvalo para recuperar la configuración si hace falta.</p><button class="secondary full" id="review-backup">Descargar respaldo JSON ↓</button><p class="notice">Las URLs de los complementos pueden llevar claves del origen. Confirma que puedes compartirlas. Esto no transfiere suscripciones.</p><label class="check-review"><input id="consent" type="checkbox"> Tengo autorización sobre la cuenta de destino y he revisado los cambios y las claves compartidas.</label><button class="primary full" id="apply-transfer" disabled>Aplicar configuración →</button><p id="transfer-log" class="progress-log" role="status"></p>`);
@@ -113,14 +126,23 @@ function reviewSave(){
   if(!source)throw new Error('Primero conecta un perfil o importa su configuración.');
   if(!accounts.source)throw new Error('Conecta la cuenta propietaria para guardar una plantilla compartida.');
   const name=$('#template-name').value.trim()||'Mi selección Nuvio';
-  const draft=structuredClone(source);
-  reviewPanel(`<span class="badge">PLANTILLA COMPARTIDA</span><h2>Revisa lo que compartes.</h2><p>Estas URLs se guardarán en la plantilla. Edita las que contengan claves personales, o elimina esos complementos en tu perfil antes de guardar. También revisa las referencias dentro de las colecciones.</p><label class="form-label" for="draft-json">Configuración completa (JSON editable)</label><textarea id="draft-json" class="url-review" spellcheck="false"></textarea><label class="check-review"><input id="save-consent" type="checkbox"> He revisado el contenido y autorizo compartir esta configuración con quienes accedan a la web.</label><button id="confirm-save" class="primary full" disabled>Guardar plantilla compartida</button><p id="save-error" class="error" role="alert"></p>`);
+  const draft=shareableConfig(source);
+  reviewPanel(`<span class="badge">PLANTILLA COMPARTIDA</span><h2>Revisa lo que compartes.</h2><p>Los proveedores reconocidos y los enlaces con indicios de claves se convierten en pasos de conexión personal. Marca los demás complementos que requieran cuenta e indica dónde obtener su enlace. Revisa también las colecciones; las que referencian enlaces personales se omiten al compartir.</p><div id="provider-controls">${['addons','plugins'].flatMap(key=>draft[key].map((item,index)=>`<div class="panel top-space"><strong>${esc(item.name||'Sin nombre')}</strong><label class="check-review"><input type="checkbox" data-personal-key="${key}" data-personal-index="${index}" ${item.requiresAccount?'checked':''}>Requiere cuenta o enlace personal</label><label class="form-label" for="provider-${key}-${index}">Página para obtener su propio enlace</label><input class="field" id="provider-${key}-${index}" data-provider-key="${key}" data-provider-index="${index}" type="url" placeholder="https://proveedor/configure" value="${esc(item.providerUrl||'')}"></div>`)).join('')}</div><details><summary class="mini-link">Ver configuración avanzada</summary><label class="form-label top-space" for="draft-json">Configuración completa (JSON editable)</label><textarea id="draft-json" class="url-review" spellcheck="false"></textarea></details><label class="check-review"><input id="save-consent" type="checkbox"> He revisado el contenido y autorizo compartir esta configuración con quienes accedan a la web.</label><button id="confirm-save" class="primary full" disabled>Guardar plantilla compartida</button><p id="save-error" class="error" role="alert"></p>`);
   $('#draft-json').value=JSON.stringify(draft,null,2);
+  $('#provider-controls').onchange=event=>{
+    const control=event.target;const key=control.dataset.personalKey||control.dataset.providerKey;
+    if(!key)return;
+    const index=Number(control.dataset.personalIndex??control.dataset.providerIndex);
+    draft[key][index].requiresAccount=$(`[data-personal-key="${key}"][data-personal-index="${index}"]`).checked;
+    draft[key][index].providerUrl=$(`#provider-${key}-${index}`).value.trim()||null;
+    if(!draft[key][index].requiresAccount && !draft[key][index].url){toast('Este proveedor ya fue protegido. Mantén la conexión personal o elimínalo desde la configuración avanzada.');draft[key][index].requiresAccount=true;control.checked=true;}
+    $('#draft-json').value=JSON.stringify(draft,null,2);$('#save-consent').checked=false;$('#confirm-save').disabled=true;
+  };
   $('#save-consent').onchange=()=>$('#confirm-save').disabled=!$('#save-consent').checked;
   $('#draft-json').oninput=()=>{$('#save-consent').checked=false;$('#confirm-save').disabled=true;};
   $('#confirm-save').onclick=async()=>{
     $('#confirm-save').disabled=true;reviewBusy=true;
-    try{const config=normalize(JSON.parse($('#draft-json').value));template=await request('/api/template',{name,config,reviewed:true},accounts.source.token);$('#review-dialog').close();toast('Plantilla guardada. Ya se puede instalar desde el inicio.');location.hash='plantilla';render();}
+    try{const config=JSON.parse($('#draft-json').value);normalize(config);template=await request('/api/template',{name,config,reviewed:true},accounts.source.token);$('#review-dialog').close();toast('Plantilla guardada. Ya se puede instalar desde el inicio.');location.hash='plantilla';render();}
     catch(e){$('#save-error').textContent=e.message;$('#confirm-save').disabled=false;}
     finally{reviewBusy=false;}
   };

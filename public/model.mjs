@@ -1,3 +1,4 @@
+import {personalProvider} from './providers.mjs';
 export const sections = ['addons', 'plugins', 'collections'];
 export function validateConfig(input) {
   if (!input || !sections.every(k => Array.isArray(input[k]))) throw new Error('La configuración debe contener addons, plugins y collections.');
@@ -13,6 +14,10 @@ export function validateConfig(input) {
         const {user_id, profile_id, ...collection} = item;
         return collection;
       }
+      if(item.requiresAccount === true) {
+        if(item.providerUrl){const page=new URL(item.providerUrl);if(page.protocol!=='https:')throw new Error('Página del proveedor inválida.');}
+        return {url:'',name:String(item.name||'Complemento personal').slice(0,250),requiresAccount:true,providerId:String(item.providerId||'personal'),providerUrl:item.providerUrl||null,enabled:item.enabled!==false,sort_order:index,...(key==='plugins'?{repo_type:item.repo_type??null}:{})};
+      }
       const url = new URL(item.url);
       if (!['https:', 'http:'].includes(url.protocol)) throw new Error('La URL de un complemento no es válida.');
       return { url: item.url, name: typeof item.name === 'string' ? item.name.slice(0, 250) : null, enabled: item.enabled !== false, sort_order: index, ...(key === 'plugins' ? {repo_type: typeof item.repo_type === 'string' ? item.repo_type : null} : {}) };
@@ -23,6 +28,8 @@ export function validateConfig(input) {
 // Do not match by display name: unrelated services can share a name.
 export function addonIdentity(item, key) {
   if (key === 'collections') return item.id;
+  const provider=personalProvider(item);
+  if(provider && provider.providerId!=='personal')return 'provider:'+provider.providerId;
   const url = new URL(item.url);
   // Torrentio encodes its settings in the path before /manifest.json.
   if (key === 'addons' && url.hostname === 'torrentio.strem.fun' && /\/manifest\.json\/?$/.test(url.pathname)) return url.origin + '/torrentio';

@@ -48,3 +48,12 @@ test('no expone reemplazo, biblioteca, perfiles o preferencias',async()=>{
     assert.equal(calls.length,start);
   }
 });
+test('guardar plantilla elimina credenciales personales incluso en colecciones anidadas',async()=>{
+  const url='https://custom-provider.test/source-token/manifest.json';
+  const body={reviewed:true,config:{addons:[{url,name:'Personal',requiresAccount:true,providerUrl:'https://custom-provider.test/configure'}],plugins:[],collections:[{id:'private',folders:[{url}]}]}};
+  const response=await handleApi(req('/api/template',body,'owner'),deps);
+  assert.equal(response.status,200);
+  assert.equal(saved.config.addons[0].requiresAccount,true);
+  assert.ok(!JSON.stringify(saved).includes('source-token'));
+  assert.equal(saved.config.collections.length,0);
+});

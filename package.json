@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",
     "test": "node --test",
-    "check": "node --check server.mjs && node --check public/app.js && node --check nuvio.mjs && node --check netlify-handler.mjs && node --check netlify/functions/api.mjs && node --check netlify/functions/login.mjs",
+    "check": "node --check server.mjs && node --check public/app.js && node --check public/providers.mjs && node --check public/model.mjs && node --check nuvio.mjs && node --check netlify-handler.mjs && node --check netlify/functions/api.mjs && node --check netlify/functions/login.mjs",
     "build": "npm run check"
   },
   "engines": {

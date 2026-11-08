@@ -30,6 +30,7 @@ export async function appendSection(action, body, token) {
   const profile = body.p_profile_id;
   if (!Number.isInteger(profile) || profile < 0 || profile > 100) throw Object.assign(new Error('Perfil inválido.'), {status:400});
   const source = validateConfig({addons:[],plugins:[],collections:[],[key]:body.items});
+  if(source[key].some(x=>x.requiresAccount))throw Object.assign(new Error('Completa u omite las conexiones personales antes de instalar.'),{status:400});
   const profiles = await nuvio(...routes.profiles,{},token);
   const selected = profiles?.find(p => p.profile_index === profile);
   if (!selected) throw Object.assign(new Error('Perfil no encontrado.'), {status:400});

@@ -60,3 +60,11 @@ Pruebas de agregado sin sobrescritura, saneado de IDs, URLs inválidas, autoriza
 Algunos ajustes son locales al dispositivo y no se transfieren. Los perfiles que heredan complementos deben configurarse desde el principal. Las colecciones conservan sus IDs y referencias de catálogo. La apariencia no ha sido verificada en navegador en este entorno.
 
 Herramienta independiente, no afiliada ni respaldada por Nuvio.
+
+## Proveedores con cuenta personal
+
+Al guardar una plantilla, los proveedores reconocidos (Nuve+, Nuve Debrid, AddonLatam, LAT-ADD, Progreso Latino, LatinoBox y LTAN) y las URLs con indicios de tokens se convierten en instrucciones de conexión. En **Revisar y guardar** puedes marcar manualmente otros complementos como **Requiere cuenta o enlace personal** e indicar su página pública. La detección es orientativa: revisa siempre los desconocidos. Las colecciones que contienen referencias reconocidas como personales se omiten de la plantilla compartida para evitar publicar credenciales anidadas.
+
+Antes de aplicar desde una plantilla o copiar cuentas, aparece un paso por proveedor personal: abrir su web en otra pestaña, iniciar sesión allí y pegar el enlace HTTPS de instalación terminado en `/manifest.json`. También se puede conservar el enlace ya instalado u omitir el complemento. No hay una integración OAuth automática. El proveedor puede tener requisitos de acceso, invitación o suscripción propios.
+
+Los enlaces del destinatario no se guardan en la plantilla compartida. Si ya habías guardado una plantilla con enlaces personales, vuelve a guardarla tras revisar las clasificaciones para sustituir la instantánea almacenada por la versión protegida. Las lecturas de plantillas antiguas también aplican el filtro de proveedores reconocidos.

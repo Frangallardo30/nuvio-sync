@@ -1,3 +1,4 @@
+import {shareableConfig} from './public/providers.mjs';
 import {nuvio, routes, appendSection} from './nuvio.mjs';
 import {validateConfig} from './model.mjs';
 
@@ -29,14 +30,14 @@ export async function handleApi(req,{ownerEmail,getStore}) {
       if(!req.headers.get('content-type')?.startsWith('application/json'))return json({error:'Se requiere JSON.'},415);
     }
     if(path==='/api/template'){
-      if(req.method==='GET')return json(await getStore().get('shared-template',{type:'json'}));
+      if(req.method==='GET'){const saved=await getStore().get('shared-template',{type:'json'});if(saved)saved.config=shareableConfig(saved.config);return json(saved);}
       if(!ownerEmail)return json({error:'Configura OWNER_EMAIL en Netlify con tu correo de Nuvio y vuelve a desplegar.'},503);
       if(!token?.startsWith('Bearer '))return json({error:'Conecta la cuenta propietaria.'},401);
       const user=await nuvio(...routes.user,null,token);
       if(user.email?.toLowerCase()!==ownerEmail.toLowerCase())return json({error:'Solo la cuenta propietaria puede actualizar la plantilla.'},403);
       const body=await readBody(req);
       if(body.reviewed!==true)return json({error:'Revisa las URLs y claves antes de compartir.'},400);
-      const template={name:String(body.name||'Mi configuración').slice(0,80),updatedAt:new Date().toISOString(),config:validateConfig(body.config)};
+      const template={name:String(body.name||'Mi configuración').slice(0,80),updatedAt:new Date().toISOString(),config:validateConfig(shareableConfig(body.config))};
       await getStore().setJSON('shared-template',template);
       return json(template);
     }
