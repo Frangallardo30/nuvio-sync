@@ -1,0 +1,17 @@
+{
+  "name": "nuvio-sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test",
+    "check": "node --check server.mjs && node --check public/app.js && node --check nuvio.mjs && node --check netlify-handler.mjs && node --check netlify/functions/api.mjs && node --check netlify/functions/login.mjs",
+    "build": "npm run check"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.8"
+  }
+}

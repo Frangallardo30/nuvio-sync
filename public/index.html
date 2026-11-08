@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0c1011"><meta name="description" content="Guarda tu configuración de Nuvio como plantilla o copia add-ons, plugins y colecciones entre cuentas."><title>Nuvio Sync · Tu configuración, donde quieras</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#plantilla"><span class="brandmark">n<span>↗</span></span><span>nuvio<span class="brand-light"> / sync</span></span></a>
+    <p class="nav-label">TU ESPACIO</p>
+    <nav aria-label="Principal"><a href="#plantilla" data-nav="plantilla"><span>▦</span> Instalar plantilla</a><a href="#copiar" data-nav="copiar"><span>⇄</span> Copiar cuentas</a><a href="#administrar" data-nav="administrar"><span>⊞</span> Mi plantilla</a></nav>
+    <div class="sidebar-bottom"><span class="small-dot"></span> Conexión con Nuvio<p>Herramienta independiente.<br>No afiliada a Nuvio.</p><a href="https://nuvio.tv/" target="_blank" rel="noreferrer">Abrir Nuvio ↗</a></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>Configuración de cuentas <span class="muted">/</span> <span id="breadcrumb">Instalar plantilla</span></span><button id="disconnect" class="text-button">Cerrar conexiones ↗</button></header>
+    <div class="content">
+      <div class="eyebrow"><span class="small-dot"></span> TU SETUP, SIN EMPEZAR DE CERO</div>
+      <h1 id="title">Todo tu Nuvio.<br>Listo para compartir.</h1>
+      <p class="intro" id="intro">Instala una configuración preparada con tus add-ons, plugins y colecciones favoritos.</p>
+      <div class="mode-tabs" aria-label="Modo"><a href="#plantilla" data-mode="plantilla">▦ &nbsp; Instalar plantilla</a><a href="#copiar" data-mode="copiar">⇄ &nbsp; Copiar entre cuentas</a></div>
+      <section id="workspace" aria-label="Configuración"></section>
+      <div class="footnotes"><div><span>◈</span><p><strong>Tú eliges qué copiar</strong><br>Add-ons, plugins y colecciones, por separado.</p></div><div><span>↶</span><p><strong>Con copia de respaldo</strong><br>Descarga el estado anterior antes de aplicar.</p></div><div><span>⌁</span><p><strong>Conexiones temporales</strong><br>Las contraseñas no se guardan.</p></div></div>
+      <footer>Hecho para que configurar sea más fácil.<span>Nuvio Sync <span class="muted">/</span> v0.1</span></footer>
+    </div>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="review-dialog"><form method="dialog"><button class="dialog-close" aria-label="Cerrar">×</button></form><div id="review-content"></div></dialog>
+</body></html>
