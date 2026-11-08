@@ -10,6 +10,6 @@ export default (req,context) => handleApi(req,{
 });
 export const config={path:[
   '/api/template','/api/nuvio/profiles','/api/nuvio/addons',
-  '/api/nuvio/plugins','/api/nuvio/collections','/api/nuvio/pushAddons',
-  '/api/nuvio/pushPlugins','/api/nuvio/pushCollections',
+  '/api/nuvio/plugins','/api/nuvio/collections','/api/nuvio/appendAddons',
+  '/api/nuvio/appendPlugins','/api/nuvio/appendCollections',
 ]};

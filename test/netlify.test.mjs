@@ -41,9 +41,10 @@ test('rutas de Netlify aíslan login con límite nativo por IP',()=>{
   assert.ok(!apiConfig.path.includes('/api/nuvio/login'));assert.equal(loginConfig.path,'/api/nuvio/login');
   assert.equal(loginConfig.rateLimit.windowLimit,12);assert.equal(loginConfig.rateLimit.aggregateBy,'ip');
 });
-test('escritura de addons conserva el contrato de Nuvio y token del destino',async()=>{
-  const payload={p_profile_id:1,p_addons:[{url:'https://addon.test/manifest.json',name:'test',enabled:true,sort_order:0}]};
-  const response=await handleApi(req('/api/nuvio/pushAddons',payload,'target'),deps);
-  assert.equal(response.status,200);assert.ok(calls.at(-1).url.endsWith('/rpc/sync_push_addons'));
-  assert.equal(calls.at(-1).options.headers.Authorization,'Bearer target');assert.deepEqual(JSON.parse(calls.at(-1).options.body),payload);
+test('no expone reemplazo, biblioteca, perfiles o preferencias',async()=>{
+  for(const action of ['pushAddons','pushPlugins','pushCollections','library','pushLibrary','deleteProfile','updateProfile','settings']) {
+    const start=calls.length;
+    assert.equal((await handleApi(req('/api/nuvio/'+action,{},'target'),deps)).status,404);
+    assert.equal(calls.length,start);
+  }
 });

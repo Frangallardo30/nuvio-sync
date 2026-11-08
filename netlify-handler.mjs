@@ -1,4 +1,4 @@
-import {nuvio, routes} from './nuvio.mjs';
+import {nuvio, routes, appendSection} from './nuvio.mjs';
 import {validateConfig} from './model.mjs';
 
 export const securityHeaders = {
@@ -43,7 +43,7 @@ export async function handleApi(req,{ownerEmail,getStore}) {
     if(!path.startsWith('/api/nuvio/'))return json({error:'No encontrado.'},404);
     if(req.method!=='POST')return json({error:'Método no permitido.'},405);
     const action=path.slice('/api/nuvio/'.length);
-    const allowed=['login','profiles','addons','plugins','collections','pushAddons','pushPlugins','pushCollections'];
+    const allowed=['login','profiles','addons','plugins','collections','appendAddons','appendPlugins','appendCollections'];
     if(!allowed.includes(action))return json({error:'Operación no disponible.'},404);
     if(action!=='login'&&!token?.startsWith('Bearer '))return json({error:'Conecta la cuenta de Nuvio.'},401);
     const body=await readBody(req);
@@ -56,6 +56,7 @@ export async function handleApi(req,{ownerEmail,getStore}) {
       if(!Number.isInteger(body.profile)||body.profile<0||body.profile>100)return json({error:'Perfil inválido.'},400);
       return json(await nuvio(`/rest/v1/${action}?select=*&profile_id=eq.${body.profile}&order=sort_order`,'GET',null,token));
     }
+    if(action.startsWith('append')) return json(await appendSection(action,body,token));
     return json(await nuvio(...routes[action],body,token));
   }catch(e){return json({error:e.status?e.message:'No se pudo completar la solicitud. Revisa los datos e inténtalo de nuevo.'},e.status||400);}
 }

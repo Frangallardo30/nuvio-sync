@@ -20,16 +20,17 @@ export function validateConfig(input) {
   }
   return result;
 }
-export function mergeConfig(target, source, selected, mode) {
+export function mergeConfig(target, source, selected) {
   const out = structuredClone(target);
   for (const key of selected) {
-    if (mode === 'replace') out[key] = structuredClone(source[key]);
-    else {
-      const identity = item => key === 'collections' ? item.id : item.url;
-      const map = new Map(target[key].map(item => [identity(item), item]));
-      source[key].forEach(item => map.set(identity(item), item));
-      out[key] = [...map.values()];
+    const identity = item => key === 'collections' ? item.id : item.url;
+    const known = new Set(out[key].map(identity));
+    let nextOrder = Math.max(-1, ...out[key].map(x => Number.isFinite(x.sort_order) ? x.sort_order : -1)) + 1;
+    for (const item of source[key]) {
+      if (known.has(identity(item))) continue;
+      known.add(identity(item));
+      out[key].push({...structuredClone(item), ...(key === 'collections' ? {} : {sort_order: nextOrder++})});
     }
   }
-  return validateConfig(out);
+  return out;
 }

@@ -18,8 +18,8 @@ Importa el repositorio en Netlify; arrastrar únicamente la carpeta `public` no 
 
 - **Instalar plantilla:** instantánea compartida que solo el propietario autenticado puede actualizar.
 - **Copiar cuentas:** conectar origen y destino, elegir perfiles y transferir add-ons, plugins y colecciones.
-- Combinar o reemplazar por sección, revisar cambios, descargar respaldo y comprobar el resultado.
-- Exportar/importar JSON. Si una escritura falla, intentar restaurar las secciones afectadas y comprobarlo.
+- Solo agregar elementos nuevos por sección, revisar cambios, descargar respaldo y comprobar el resultado.
+- Exportar/importar JSON. Si una escritura falla, se detiene la operación sin eliminar elementos para deshacerla.
 
 Las cuentas y contraseñas no se guardan. Las contraseñas pasan por la función durante el inicio de sesión hacia Nuvio. Los tokens temporales quedan en memoria del navegador; si expiran, vuelve a conectar. No se utiliza localStorage para credenciales. El login tiene un límite nativo de 12 solicitudes por IP cada minuto.
 
@@ -38,9 +38,13 @@ npm start
 
 Abre http://localhost:3000. El servidor local usa `data/template.json`; este archivo no se sube a GitHub y no se sincroniza automáticamente con la plantilla de Netlify. Para usar la misma configuración, expórtala como JSON e impórtala en **Mi plantilla** de la web desplegada. Se incluye un Dockerfile para alojamiento alternativo con volumen persistente en `/data`.
 
-## Restaurar un respaldo
+## Conservación de los datos del destino
 
-Antes de aplicar, descarga el JSON del resumen y consérvalo. Para restaurarlo, impórtalo en **Mi plantilla**, abre **Copiar cuentas**, conecta el destino y selecciona **Reemplazar**. Las transferencias no son transacciones: un fallo de red puede impedir tanto aplicar como restaurar; la interfaz indica si pudo comprobar la recuperación.
+Solo se agregan add-ons y plugins con URLs nuevas, y colecciones con IDs nuevos. Ante una coincidencia se conserva la configuración del destino: nombres, activación, orden y contenido de colecciones. La biblioteca, el historial, los nombres de perfiles y las preferencias no tienen rutas de escritura en esta app. La cuenta de origen solo se lee. Importar un JSON también sigue la regla de solo agregar; no permite restauraciones destructivas.
+
+Antes de aplicar, puedes descargar un respaldo. Si ocurre un fallo parcial, se informa y puedes volver a revisar para agregar lo pendiente; no se borran elementos para deshacer. Las peticiones que solo contienen duplicados no escriben nada.
+
+La API de Nuvio disponible guarda listas completas. El servidor lee la lista actual y conserva sus elementos al añadir los nuevos; no dispone de una operación atómica de agregado. Evita modificar el perfil simultáneamente desde otra app o dispositivo durante la transferencia. Esta protección se comprueba con pruebas simuladas; falta validarla con cuentas reales.
 
 ## Verificación y límites
 
@@ -49,7 +53,7 @@ npm run build
 npm test
 ```
 
-Pruebas de combinación, reemplazo, saneado de IDs, URLs inválidas, autorización, persistencia y contratos HTTP para servidor local y funciones. Las pruebas simulan Nuvio; no modifican cuentas reales. La compatibilidad completa necesita probarse con tus cuentas. Se contrastaron rutas y campos con el cliente público de [Nuvio Account Manager](https://github.com/techuhak/Nuvio-Account-Manager).
+Pruebas de agregado sin sobrescritura, saneado de IDs, URLs inválidas, autorización, persistencia y contratos HTTP para servidor local y funciones. Las pruebas simulan Nuvio; no modifican cuentas reales. La compatibilidad completa necesita probarse con tus cuentas. Se contrastaron rutas y campos con el cliente público de [Nuvio Account Manager](https://github.com/techuhak/Nuvio-Account-Manager).
 
 Algunos ajustes son locales al dispositivo y no se transfieren. Los perfiles que heredan complementos deben configurarse desde el principal. Las colecciones conservan sus IDs y referencias de catálogo. La apariencia no ha sido verificada en navegador en este entorno.
 

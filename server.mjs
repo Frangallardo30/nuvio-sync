@@ -6,7 +6,7 @@ import {validateConfig} from './model.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const dataDir = process.env.DATA_DIR || join(root, 'data');
-import {nuvio, routes} from './nuvio.mjs';
+import {nuvio, routes, appendSection} from './nuvio.mjs';
 async function jsonBody(req) {
   let size = 0, chunks = [];
   for await (const chunk of req) {size += chunk.length; if (size > 2_000_000) throw Object.assign(new Error('Archivo demasiado grande (máximo 2 MB).'), {status: 413}); chunks.push(chunk);}
@@ -68,7 +68,8 @@ export const server = createServer(async (req, res) => {
         if (!Number.isInteger(body.profile) || body.profile < 0 || body.profile > 100) return send(400, {error: 'Perfil inválido.'});
         return send(200, await nuvio(`/rest/v1/${action}?select=*&profile_id=eq.${body.profile}&order=sort_order`, 'GET', null, token));
       }
-      if (!routes[action] || action === 'user') return send(404, {error: 'Operación no disponible.'});
+      if (['appendAddons','appendPlugins','appendCollections'].includes(action)) return send(200, await appendSection(action, body, token));
+      if (!['profiles','collections'].includes(action)) return send(404, {error: 'Operación no disponible.'});
       return send(200, await nuvio(...routes[action], body, token));
     }
     if (req.method !== 'GET') return send(405, {error: 'Método no permitido.'});

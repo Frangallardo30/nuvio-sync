@@ -5,7 +5,7 @@ const labels = {addons:'Add-ons', plugins:'Plugins', collections:'Colecciones'};
 let mode = location.hash.slice(1) || 'plantilla', template = null, source = null, backup = null, busy = false, reviewBusy = false;
 const accounts = {source:null, target:null};
 const selected = new Set(keys);
-let strategy = 'merge';
+
 function toast(message) {$('#toast').textContent = message; $('#toast').classList.add('visible'); setTimeout(() => $('#toast').classList.remove('visible'), 7000);}
 async function request(path, body, token) {
   const res = await fetch(path, {method:body === undefined ? 'GET' : 'POST', headers:{'content-type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, ...(body === undefined ? {} : {body:JSON.stringify(body)})});
@@ -29,7 +29,7 @@ function items(config) {
   return keys.map(k=>`<p class="section-label">${labels[k].toUpperCase()}</p><ul class="list">${config[k].length ? config[k].map(x=>`<li><span>${esc(x.name || x.title || 'Sin nombre')}</span><small>${x.enabled === false ? 'Desactivado' : '✓'}</small></li>`).join('') : '<li class="muted">Sin elementos</li>'}</ul>`).join('');
 }
 function options(config) {
-  return `<section class="panel"><div class="step-heading"><span class="step-number">3</span><h2>Elige qué transferir</h2></div><div class="options">${keys.map(k=>`<label class="option"><input type="checkbox" data-section="${k}" ${selected.has(k)?'checked':''}>${labels[k]}<span>${config[k].length} elementos</span></label>`).join('')}</div><label class="form-label" for="strategy">Al aplicar en el destino</label><select id="strategy" class="field"><option value="merge" ${strategy==='merge'?'selected':''}>Combinar con lo que ya tiene</option><option value="replace" ${strategy==='replace'?'selected':''}>Reemplazar las secciones seleccionadas</option></select><p class="muted">Combinar conserva los elementos del destino. Si una URL o el ID de una colección coincide, se usa la versión de origen.</p><p class="notice">Solo se copian datos sincronizados. Los ajustes locales y las suscripciones personales pueden requerir configuración aparte.</p><button class="primary full" data-action="review" ${!accounts.target || !selected.size?'disabled':''}>Revisar configuración <span>→</span></button></section>`;
+  return `<section class="panel"><div class="step-heading"><span class="step-number">3</span><h2>Elige qué transferir</h2></div><div class="options">${keys.map(k=>`<label class="option"><input type="checkbox" data-section="${k}" ${selected.has(k)?'checked':''}>${labels[k]}<span>${config[k].length} elementos</span></label>`).join('')}</div><p class="notice">Solo agregar lo que falta. Se conservan los complementos existentes, su configuración y su orden. No se modifican biblioteca, nombres de perfiles ni preferencias.</p><button class="primary full" data-action="review" ${!accounts.target || !selected.size?'disabled':''}>Revisar configuración <span>→</span></button></section>`;
 }
 function render() {
   if (!['plantilla','copiar','administrar'].includes(mode)) mode='plantilla';
@@ -71,15 +71,13 @@ async function loadSource(){source=await readConfig(accounts.source, accounts.so
 function merge(target, origin, sections) {
   const out=structuredClone(target);
   for(const k of sections){
-    if(strategy==='replace') out[k]=structuredClone(origin[k]);
-    else {const id=x=>k==='collections'?x.id:x.url;const entries=new Map(target[k].map(x=>[id(x),x]));origin[k].forEach(x=>entries.set(id(x),x));out[k]=[...entries.values()];}
+    const id=x=>k==='collections'?x.id:x.url;const known=new Set(target[k].map(id));origin[k].forEach(x=>{if(!known.has(id(x))){known.add(id(x));out[k].push(structuredClone(x));}});
   }
   return normalize(out);
 }
 async function writeSection(account,k,config){
-  const action={addons:'pushAddons',plugins:'pushPlugins',collections:'pushCollections'}[k];
-  const param={addons:'p_addons',plugins:'p_plugins',collections:'p_collections_json'}[k];
-  await api(action,{p_profile_id:account.profile,[param]:config[k]},account);
+  const action={addons:'appendAddons',plugins:'appendPlugins',collections:'appendCollections'}[k];
+  await api(action,{p_profile_id:account.profile,items:config[k]},account);
 }
 function reviewPanel(html) {$('#review-content').innerHTML=html; if(!$('#review-dialog').open)$('#review-dialog').showModal();}
 async function reviewTransfer(){
@@ -93,7 +91,7 @@ async function reviewTransfer(){
     const before=await readConfig(account);
     const sectionList=[...selected]; const after=merge(before,origin,sectionList);
     const target={...account};
-    reviewPanel(`<span class="badge">REVISIÓN FINAL</span><h2>Así quedará el destino.</h2><p><strong>${esc(target.email)}</strong> · ${esc(profile.name)}<br>Modo: ${strategy==='replace'?'Reemplazar':'Combinar'}</p>${sectionList.map(k=>`<div class="review-row"><span>${labels[k]}</span><span>${before[k].length} → <strong>${after[k].length}</strong></span></div>`).join('')}<p>Se guardará un respaldo en esta sesión. Descárgalo antes de aplicar y consérvalo para recuperar la configuración si hace falta.</p><button class="secondary full" id="review-backup">Descargar respaldo JSON ↓</button><p class="notice">Las URLs de los complementos pueden llevar claves del origen. Confirma que puedes compartirlas. Esto no transfiere suscripciones.</p><label class="check-review"><input id="consent" type="checkbox"> Tengo autorización sobre la cuenta de destino y he revisado los cambios y las claves compartidas.</label><button class="primary full" id="apply-transfer" disabled>Aplicar configuración →</button><p id="transfer-log" class="progress-log" role="status"></p>`);
+    reviewPanel(`<span class="badge">REVISIÓN FINAL</span><h2>Así quedará el destino.</h2><p><strong>${esc(target.email)}</strong> · ${esc(profile.name)}<br>Modo: Solo agregar elementos nuevos</p>${sectionList.map(k=>`<div class="review-row"><span>${labels[k]}</span><span>${before[k].length} → <strong>${after[k].length}</strong></span></div>`).join('')}<p>Se guardará un respaldo en esta sesión. Descárgalo antes de aplicar y consérvalo para recuperar la configuración si hace falta.</p><button class="secondary full" id="review-backup">Descargar respaldo JSON ↓</button><p class="notice">Las URLs de los complementos pueden llevar claves del origen. Confirma que puedes compartirlas. Esto no transfiere suscripciones.</p><label class="check-review"><input id="consent" type="checkbox"> Tengo autorización sobre la cuenta de destino y he revisado los cambios y las claves compartidas.</label><button class="primary full" id="apply-transfer" disabled>Aplicar configuración →</button><p id="transfer-log" class="progress-log" role="status"></p>`);
     backup={version:1,createdAt:new Date().toISOString(),profile:target.profile,config:before};
     $('#review-backup').onclick=()=>download(backup,'nuvio-respaldo.json');
     $('#consent').onchange=()=>$('#apply-transfer').disabled=!$('#consent').checked;
@@ -104,17 +102,13 @@ async function reviewTransfer(){
         log.textContent='Comprobando que el destino no haya cambiado…';
         const fresh=await readConfig(target);
         if(JSON.stringify(fresh)!==JSON.stringify(before))throw new Error('El destino cambió desde la revisión. Cierra el resumen y vuelve a revisar.');
-        for(const k of sectionList){log.textContent+=`\nAplicando ${labels[k]}…`;written.push(k);await writeSection(target,k,after);}
+        for(const k of sectionList){log.textContent+=`\nAplicando ${labels[k]}…`;written.push(k);await writeSection(target,k,origin);}
         const check=await readConfig(target);
         for(const k of sectionList)if(JSON.stringify(check[k])!==JSON.stringify(after[k]))throw new Error('La lectura posterior no coincide con lo enviado.');
         log.textContent+='\n✓ Configuración aplicada y comprobada. Abre Nuvio y sincroniza el perfil.';log.classList.add('success');button.textContent='Configuración aplicada ✓';toast('Configuración aplicada y verificada.');
       } catch(e) {
         log.textContent+=`\n${e.message}`;
-        if(written.length){log.textContent+='\nIntentando restaurar las secciones modificadas…';let restored=true;
-          for(const k of written.reverse())try{await writeSection(target,k,before);}catch{restored=false;}
-          if(restored)try{const check=await readConfig(target);restored=written.every(k=>JSON.stringify(check[k])===JSON.stringify(before[k]));}catch{restored=false;}
-          log.textContent+=restored?'\nSe restauró y comprobó el estado anterior.':'\nNo se pudo confirmar la restauración completa. Conserva el respaldo e impórtalo desde Mi plantilla para restaurarlo en el destino.';
-        }
+        if(written.length)log.textContent+='\nLa operación puede haber agregado algunos elementos. No se eliminará nada para deshacerla. Puedes volver a revisar: los elementos existentes se omiten.';
         log.classList.add('error');button.textContent='Operación detenida';
       } finally {reviewBusy=false;}
     };
@@ -152,7 +146,6 @@ document.addEventListener('submit',async event=>{
 document.addEventListener('change',async event=>{
   const el=event.target;
   if(el.dataset.section){el.checked?selected.add(el.dataset.section):selected.delete(el.dataset.section);const button=$('[data-action="review"]');if(button)button.disabled=!accounts.target||!selected.size;}
-  if(el.id==='strategy')strategy=el.value;
   if(el.dataset.profile){
     if(busy)return;busy=true;const role=el.dataset.profile;const previous=accounts[role].profile;accounts[role].profile=Number(el.value);el.disabled=true;
     try {if(role==='source')await loadSource();render();}catch(e){accounts[role].profile=previous;el.value=previous;el.disabled=false;toast(e.message);}finally{busy=false;}
