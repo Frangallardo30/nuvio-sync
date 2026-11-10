@@ -74,3 +74,5 @@ Los enlaces del destinatario no se guardan en la plantilla compartida. Si ya hab
 En el menú **Guía de configuración** (`/#guia`) se puede consultar el contenido reorganizado del PDF: enlaces de proveedores, pasos, notas, capturas ampliables y revisión final. Incluye búsqueda y casillas de progreso guardadas únicamente en el navegador, sin credenciales. Abrir o marcar la guía no instala complementos ni modifica cuentas. Las referencias originales conservan las advertencias sobre acceso personal, enlaces no confirmados y discrepancias de idiomas.
 
 La guía también incluye los complementos adicionales del perfil seleccionados por el propietario: OpenSubtitles v3, PenguPlay, CNCVerse Bridge, Vidbolt & Filmx Sources, Internet Archive Movies & Shows, PlavioHD y NexoTV. Solo se publican referencias base y notas de acceso; no las rutas personales de instalación.
+
+En las fichas con un preset facilitado por el propietario aparece **Configuración recomendada**, con el manifiesto visible para copiar y un botón independiente **Prefiero configurarlo yo**. AnimeSub+ incluye el enlace facilitado para ese preset. Copiarlo no instala ni modifica nada automáticamente.

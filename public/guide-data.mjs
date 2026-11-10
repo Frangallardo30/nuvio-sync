@@ -187,7 +187,8 @@ export const guideSections = [
           "/guide-assets/captura-3-2.jpg",
           "/guide-assets/captura-3-4.jpg",
           "/guide-assets/captura-3-3.jpg"
-        ]
+        ],
+        "recommendedManifest": "https://animesub.duckdns.org/u_4gMEqymPH4_aOZNSbEqBEQ/manifest.json"
       },
       {
         "id": "guide-4-1",
