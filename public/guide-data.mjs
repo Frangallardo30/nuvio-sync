@@ -248,6 +248,75 @@ export const guideSections = [
     ]
   },
   {
+    "id": "guide-profile-extras",
+    "title": "Otros complementos de tu perfil",
+    "items": [
+      {
+        "id": "guide-extra-opensubtitles-v3",
+        "name": "OpenSubtitles v3",
+        "kind": "SUBTÍTULOS",
+        "url": "https://opensubtitles-v3.strem.io/",
+        "steps": "Abre la página del addon y utiliza su opción de instalación para obtener el enlace de manifest. Agrégalo a Nuvio desde Add-ons.",
+        "note": "Añadido desde tu lista. La página pública muestra una opción de instalación; no se copiaron enlaces con credenciales.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-penguplay",
+        "name": "PenguPlay",
+        "kind": "REVISAR CONFIGURACIÓN",
+        "url": "https://pengu.uk/",
+        "steps": "Abre la página del proveedor y sigue su configuración. Obtén el enlace completo del manifest antes de pegarlo en Nuvio.",
+        "note": "La portada consultada muestra un aviso inicial. Tu enlace configurado no se publica aquí; falta confirmar si requiere cuenta o ajustes personales.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-cncverse",
+        "name": "CNCVerse Bridge · Main",
+        "kind": "CONFIGURAR PERFIL DEL PROVEEDOR",
+        "url": "https://cncverse.dpdns.org/",
+        "steps": "Crea o selecciona tu propio perfil dentro de CNCVerse Bridge. Elige fuentes, catálogos, calidades e idiomas; usa Copy Addon URL para obtener tu enlace. Si quieres sincronizar sus perfiles entre dispositivos, inicia sesión allí.",
+        "note": "Los perfiles de CNCVerse son del proveedor, no los perfiles de Nuvio. No copies el enlace del perfil Main de otra persona; sus ajustes pueden sincronizarse en el servidor.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-vidbolt-filmx",
+        "name": "Vidbolt & Filmx Sources",
+        "kind": "REVISAR ENLACE DE INSTALACIÓN",
+        "url": "https://movie-addon.vercel.app/",
+        "steps": "Abre la dirección de referencia y busca el enlace de instalación. Si la página no ofrece uno, consulta al proveedor o utiliza un manifest completo que hayas confirmado.",
+        "note": "Añadido desde tu perfil. No se pudo verificar el acceso a la página; no se afirma que requiera cuenta ni que el enlace base sea un manifest instalable.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-internet-archive",
+        "name": "Internet Archive Movies & Shows",
+        "kind": "REVISAR ENLACE DE INSTALACIÓN",
+        "url": "https://archive-addon.onrender.com/",
+        "steps": "Abre la referencia del addon y obtén su manifest completo antes de agregarlo en Nuvio.",
+        "note": "Añadido desde tu perfil. El acceso no pudo verificarse; confirma el enlace de instalación y si necesita configuración adicional.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-plaviohd",
+        "name": "PlavioHD",
+        "kind": "CONFIGURACIÓN PERSONAL POR CONFIRMAR",
+        "url": "https://hd.plavio.site/",
+        "steps": "Abre el proveedor y obtén tu propio enlace de instalación. Si solicita iniciar sesión o una clave, usa los datos del destinatario.",
+        "note": "El enlace de tu perfil contiene una ruta configurada que no se reproduce aquí. La página base no pudo verificarse y falta confirmar su proceso de acceso.",
+        "images": []
+      },
+      {
+        "id": "guide-extra-nexotv",
+        "name": "NexoTV",
+        "kind": "REVISAR LAS DOS CONFIGURACIONES",
+        "url": "https://263f84288ddb-nexotv.baby-beamup.club/",
+        "steps": "En tu lista hay dos enlaces distintos de esta instancia. Revisa cuál corresponde a cada configuración antes de instalar; para otra persona, consigue su propio enlace si incluye cuenta o ajustes personales.",
+        "note": "Se incluye una sola ficha de referencia. No se fusionan ni se borran tus dos instalaciones, y sus rutas configuradas no se publican. La página base no pudo verificarse.",
+        "images": []
+      }
+    ]
+  },
+  {
     "id": "guide-plugins",
     "title": "Plugins y revisión final",
     "items": [
