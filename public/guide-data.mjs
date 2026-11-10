@@ -126,15 +126,6 @@ export const guideSections = [
         "images": []
       },
       {
-        "id": "guide-2-2",
-        "name": "Nuve Debrid",
-        "kind": "CUENTA NUVEHUB + TORBOX",
-        "url": "https://nuvehub.app/addons?tab=debrid",
-        "steps": "Inicia sesión con tu cuenta. En Debrid configura tu propia clave de TorBox y copia tu enlace personal.",
-        "note": "La credencial de NuveHub y la clave de TorBox corresponden al destinatario.",
-        "images": []
-      },
-      {
         "id": "guide-2-3",
         "name": "LatinoBox",
         "kind": "CUENTA + CONFIGURADOR",
@@ -177,17 +168,6 @@ export const guideSections = [
         "steps": "Revisa el configurador y tus credenciales. El original pide excluir otros idiomas, pero no enumera cuáles conservar.",
         "note": "No se inventó una selección. Confírmala antes de generar el enlace.",
         "images": []
-      },
-      {
-        "id": "guide-3-3",
-        "name": "Torrentio con debrid",
-        "kind": "CONFIGURAR + TU CLAVE",
-        "url": "https://torrentio.strem.fun/configure",
-        "steps": "Selecciona tu Debrid Provider e introduce tu propia API key. Conserva la prioridad de japonés, español y latino; copia el enlace final.",
-        "note": "Puedes elegir esta variante en lugar de la versión sin debrid. No hace falta instalar ambas por defecto.",
-        "images": [
-          "/guide-assets/captura-2-2.jpg"
-        ]
       }
     ]
   },
@@ -333,4 +313,4 @@ export const guideSections = [
   }
 ];
 
-export const imageDimensions = {"/guide-assets/captura-3-3.jpg": [1050, 2281], "/guide-assets/captura-3-2.jpg": [1050, 2281], "/guide-assets/captura-5-4.jpg": [1050, 2281], "/guide-assets/captura-5-1.jpg": [1050, 2281], "/guide-assets/captura-2-1.jpg": [622, 1248], "/guide-assets/captura-1-1.jpg": [1050, 1963], "/guide-assets/captura-3-1.jpg": [1050, 2281], "/guide-assets/captura-2-2.jpg": [594, 1139], "/guide-assets/captura-4-1.jpg": [1050, 2281], "/guide-assets/captura-5-3.jpg": [1050, 2281], "/guide-assets/captura-5-2.jpg": [1050, 2281], "/guide-assets/captura-4-2.jpg": [1050, 2281], "/guide-assets/captura-3-4.jpg": [1050, 2281]};
+export const imageDimensions = {"/guide-assets/captura-3-3.jpg": [1050, 2281], "/guide-assets/captura-3-2.jpg": [1050, 2281], "/guide-assets/captura-5-4.jpg": [1050, 2281], "/guide-assets/captura-5-1.jpg": [1050, 2281], "/guide-assets/captura-2-1.jpg": [622, 1248], "/guide-assets/captura-1-1.jpg": [1050, 1963], "/guide-assets/captura-3-1.jpg": [1050, 2281], "/guide-assets/captura-4-1.jpg": [1050, 2281], "/guide-assets/captura-5-3.jpg": [1050, 2281], "/guide-assets/captura-5-2.jpg": [1050, 2281], "/guide-assets/captura-4-2.jpg": [1050, 2281], "/guide-assets/captura-3-4.jpg": [1050, 2281]};
