@@ -197,11 +197,12 @@ export const guideSections = [
         "name": "Meteor",
         "kind": "CONFIGURAR IDIOMAS",
         "url": "https://meteorfortheweebs.midnightignite.me/configure",
-        "steps": "Idiomas preferidos: latino y español. Idiomas requeridos: latino, español y japonés. Excluye los demás, según el texto del PDF.",
-        "note": "La captura también muestra Cached only y Your media desactivados. Anexo D.",
+        "steps": "Copia el preset recomendado para instalarlo directamente o abre el configurador para crear tus propios ajustes. Idiomas preferidos, en este orden: inglés, japonés, latino, multi y español. Modo P2P activado; Cached only y Your media desactivados.",
+        "note": "Se conserva exactamente el enlace facilitado: sin idiomas excluidos, sin filtro de resolución y sin límites de resultados o semilleros. Permite contenido adulto y no elimina muestras ni resultados basura. El preset nuevo prevalece sobre las instrucciones y la captura antiguas del PDF.",
         "images": [
           "/guide-assets/captura-4-1.jpg"
-        ]
+        ],
+        "recommendedManifest": "https://meteorfortheweebs.midnightignite.me/eyJjYWNoZWRPbmx5IjpmYWxzZSwic2tpcFJlbGVhc2VGaWx0ZXIiOnRydWUsInJlbW92ZVRyYXNoIjpmYWxzZSwicmVtb3ZlU2FtcGxlcyI6ZmFsc2UsImFsbG93QWR1bHQiOnRydWUsImV4Y2x1ZGUzRCI6ZmFsc2UsImVuYWJsZVNlYURleCI6ZmFsc2UsInNob3dZb3VyTWVkaWEiOmZhbHNlLCJ5b3VyTWVkaWFMZWdhY3lNb2RlIjpmYWxzZSwibWluU2VlZGVycyI6MCwibWF4UmVzdWx0cyI6MCwibWF4UGVyUmVzb2x1dGlvbiI6MCwicmVzb2x1dGlvbnMiOltdLCJwcmVmZXJyZWRMYW5ncyI6WyJlbiIsImphIiwibGF0IiwibXVsdGkiLCJlcyJdLCJsYW5ndWFnZXMiOlsiZW4iLCJqYSIsIm11bHRpIiwibGF0IiwiZXMiXSwiZXhjbHVkZWRMYW5ncyI6W10sInJlc3VsdEZvcm1hdCI6WyJ0aXRsZSIsInF1YWxpdHkiLCJzaXplIiwiYXVkaW9sYW5nIiwic3VibGFuZyIsInNvdXJjZSIsInJlbGVhc2UiXSwibGFuZ3VhZ2VGb3JtYXQiOiJjb2RlcyIsInNvcnRPcmRlciI6WyJ5b3VybWVkaWEiLCJjYWNoZWQiLCJzZWFkZXgiLCJyZXNvbHV0aW9uIiwicXVhbGl0eSIsInNjb3JlIiwibGFuZ3VhZ2UiLCJzZWVkZXJzIiwic2l6ZSIsInBhY2siLCJoZHIiLCJjb2RlYyJdLCJhbGxvd1AyUCI6dHJ1ZSwiZXhjbHVkZWRTb3VyY2VzIjpbXX0/manifest.json"
       },
       {
         "id": "guide-4-2",
