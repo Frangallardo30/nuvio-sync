@@ -22,7 +22,7 @@ before(async()=>{server.listen(0,'127.0.0.1');await once(server,'listening');bas
 after(async()=>{await new Promise(resolve=>server.close(resolve));global.fetch=originalFetch;await rm(dir,{recursive:true,force:true});});
 const post=(path,body,token,extra={})=>originalFetch(base+path,{method:'POST',headers:{'content-type':'application/json',...(token?{Authorization:`Bearer ${token}`} : {}),...extra},body:JSON.stringify(body)});
 test('sirve app y recursos sin exponer archivos internos',async()=>{
-  for(const path of ['/','/app.js','/style.css'])assert.equal((await originalFetch(base+path)).status,200);
+  for(const path of ['/','/app.js','/style.css','/guide.mjs','/guide-data.mjs','/guide-assets/captura-1-1.jpg'])assert.equal((await originalFetch(base+path)).status,200);
   assert.equal((await originalFetch(base+'/.env')).status,404);
   assert.equal((await originalFetch(base+'/server.mjs')).status,404);
 });

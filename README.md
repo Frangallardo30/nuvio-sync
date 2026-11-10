@@ -68,3 +68,7 @@ Al guardar una plantilla, los proveedores reconocidos (Nuve+, Nuve Debrid, Addon
 Antes de aplicar desde una plantilla o copiar cuentas, aparece un paso por proveedor personal: abrir su web en otra pestaña, iniciar sesión allí y pegar el enlace HTTPS de instalación terminado en `/manifest.json`. También se puede conservar el enlace ya instalado u omitir el complemento. No hay una integración OAuth automática. El proveedor puede tener requisitos de acceso, invitación o suscripción propios.
 
 Los enlaces del destinatario no se guardan en la plantilla compartida. Si ya habías guardado una plantilla con enlaces personales, vuelve a guardarla tras revisar las clasificaciones para sustituir la instantánea almacenada por la versión protegida. Las lecturas de plantillas antiguas también aplican el filtro de proveedores reconocidos.
+
+## Guía de configuración dentro de la app
+
+En el menú **Guía de configuración** (`/#guia`) se puede consultar el contenido reorganizado del PDF: enlaces de proveedores, pasos, notas, capturas ampliables y revisión final. Incluye búsqueda y casillas de progreso guardadas únicamente en el navegador, sin credenciales. Abrir o marcar la guía no instala complementos ni modifica cuentas. Las referencias originales conservan las advertencias sobre acceso personal, enlaces no confirmados y discrepancias de idiomas.

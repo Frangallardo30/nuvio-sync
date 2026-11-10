@@ -19,3 +19,7 @@ Dirección fijada: herramienta oscura de configuración, navegación persistente
 | Estado vacío sin datos inventados | Contexto | No se muestran add-ons ficticios como si fueran del usuario |
 
 Límite de validación visual: SITES_MANAGED_LINUX_CONTAINER=1 pero no está instalado cua_repl.js. No se improvisó una ruta de control de navegador. Se verifican los recursos y flujos de datos mediante pruebas HTTP.
+
+## Sección de guía
+
+La guía amplía el sistema existente: mismos paneles oscuros, tipografía y acento verde para enlaces y selección. El contenido procede de la guía PDF ordenada, con notas de verificación intactas. Se adapta el patrón de formularios y foco visible de Refero craft-details a búsqueda y casillas. Las capturas originales se muestran bajo detalles desplegables, con carga diferida, proporciones reales y enlaces para ampliarlas; en móvil las fichas pasan a una columna.

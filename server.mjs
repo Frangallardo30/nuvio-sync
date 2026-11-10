@@ -75,6 +75,8 @@ export const server = createServer(async (req, res) => {
     }
     if (req.method !== 'GET') return send(405, {error: 'Método no permitido.'});
     const files = {'/': ['index.html', 'text/html; charset=utf-8'], '/providers.mjs': ['providers.mjs', 'text/javascript; charset=utf-8'], '/model.mjs': ['model.mjs', 'text/javascript; charset=utf-8'], '/app.js': ['app.js', 'text/javascript; charset=utf-8'], '/style.css': ['style.css', 'text/css; charset=utf-8']};
+    for(const name of ['guide.mjs','guide-data.mjs'])files['/'+name]=[name,'text/javascript; charset=utf-8'];
+    if(/^\/guide-assets\/captura-[1-5]-[1-4]\.jpg$/.test(url.pathname))files[url.pathname]=[url.pathname.slice(1),'image/jpeg'];
     if (!files[url.pathname]) return send(404, {error: 'No encontrado.'});
     const [file, type] = files[url.pathname];
     res.writeHead(200, {'content-type': type}); res.end(await readFile(join(root, 'public', file)));
